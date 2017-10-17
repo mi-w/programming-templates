@@ -76,7 +76,7 @@ def setupArguments():
 	p.add("--log-level", metavar="LEVEL", dest="loglevel", type=str,
 	      default="INFO", help="Sets console log level. Valid Values are TRACE, VERBOSE, DEBUG, INFO, NOTICE, WARNING, SUPPRESSED, ERROR, CRITICAL, ALERT, EMERGENCY")
 
-	p.add('-o', "--output", metavar="OUTPUT FILE", dest="inputfile", type=configargparse.FileType('w'),
+	p.add('-o', "--output", metavar="OUTPUT FILE", dest="outfile", type=configargparse.FileType('w'),
 	      default=sys.stdout, help="Set output to a file")
 	p.add("-i", "--input", metavar="INPUT FILES", dest="infile", type=configargparse.FileType('r'), nargs='+',
 	      help="A list of input files")

@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 import os
 import sys
+import logging
+from logging_levels.standards import add_standards
 import unittest
 import subprocess
 from pathlib import Path
@@ -11,7 +13,7 @@ DESCRIPTION = MODULE+""":
 High level test: Run the main program and check for correct output
 """
 EXAMPLE_USAGE = """"""
-
+add_standards(logging)
 
 class TestProgram(unittest.TestCase):
 	PROGRAM_NAME = "template_main.py"
@@ -28,6 +30,10 @@ class TestProgram(unittest.TestCase):
 	TMP_OUTPUT_FILE = "tmpoutput.tmp"
 	TEST_CONFIG_FILE = ""
 	TEST_PW_FILE = "./testpwfile.txt"
+	log = logging.getLogger(__name__)
+
+	def setUp(self):
+		pass  # TODO: setupLogger
 
 	def test_emptyInput(self):
 		self.assertEqual(subprocess.run(["python3",
