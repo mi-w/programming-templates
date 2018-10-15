@@ -6,16 +6,12 @@
 # System packages
 import os
 import sys
-import logging as globalLogger
-import logging.handlers
-import logging.config
-
-# Logging (see https://pypi.python.org/pypi/logging_levels):
-from logging_levels import isolated_logging, log_exceptions
-from logging_levels.standards import add_standards
-import json
+import logging
 # Commandline parameters & Config file
 import configargparse
+
+# Custom packages
+from logsetup import setupLogger
 
 
 PROGRAM = "Template"
@@ -27,37 +23,6 @@ TODO
 EXAMPLE_USAGE = """"""
 
 
-def setupLogger(configfile="./logger.cfg", consoleLevel="INFO", logDir="./", logFile=PROGRAM+".log"):
-	""" Setup a console and file logger
-	:param consolelevel: Sets the loglevel for the console (string). The file log
-	 level is always DEBUG
-	:param logDir: Set the destination dir for the logfile.
-	:param logFile: The filename of the logfile. If no extension is given '.log'
-	 will be appended
-	"""
-	# Setup directories
-	logDir = logDir if logDir.endswith('/') else logDir + '/'
-	logFile = logFile if '.' in logFile else logFile + '.log'
-	if not os.path.exists(logDir): os.mkdir(logDir)
-
-	# Add more log levels
-	add_standards(globalLogger)
-
-	if os.path.exists(configfile):  # load configuration form file
-		with open(configfile, "rt") as f:
-			cfg = json.load(f)
-			# Set logfile location if not in config:
-			if not cfg["handlers"]["file"].get("filename"): cfg["handlers"]["file"]["filename"] = logDir+logFile
-			# Overwrite console log level
-			if cfg["handlers"].get("console"): cfg["handlers"]["console"]["level"] = consoleLevel
-			# Set config
-			globalLogger.config.dictConfig(cfg)
-	else:
-		globalLogger.basicConfig()
-	log = logging.getLogger(sys.modules['__main__'].__file__)
-	log.trace("Logger set up")
-	return log
-
 
 def setupArguments():
 	"""Setup argument parser for commandline arguments.
@@ -65,6 +30,7 @@ def setupArguments():
 	Default value, config file value, commandline value
 	"""
 
+	LOGGER_LEVELS = ["TRACE", "VERBOSE", "DEBUG", "INFO", "NOTICE", "WARNING", "SUPPRESSED", "ERROR", "CRITICAL", "ALERT", "EMERGENCY"]
 	formatter_class = configargparse.RawDescriptionHelpFormatter
 	p = configargparse.ArgParser(description=DESCRIPTION,
 	                             epilog=EXAMPLE_USAGE,
@@ -73,8 +39,8 @@ def setupArguments():
 	p.add("--version", action="version", version="%(prog)s {}".format(__version__))
 	p.add("--config", required=False, is_config_file=True, help="Config file for this program")
 	p.add("--logger-config", required=False, dest="logconfig", default="./logger.cfg", type=str, help="Logger config file for this program")
-	p.add("--log-level", metavar="LEVEL", dest="loglevel", type=str,
-	      default="INFO", help="Sets console log level. Valid Values are TRACE, VERBOSE, DEBUG, INFO, NOTICE, WARNING, SUPPRESSED, ERROR, CRITICAL, ALERT, EMERGENCY")
+	p.add("--log-level", metavar="LEVEL", dest="loglevel", type=str, choices=LOGGER_LEVELS,
+	      default="INFO", help="Sets console log level. Valid Values are "+', '.join(LOGGER_LEVELS))
 
 	p.add('-o', "--output", metavar="OUTPUT FILE", dest="outfile", type=configargparse.FileType('w'),
 	      default=sys.stdout, help="Set output to a file")
